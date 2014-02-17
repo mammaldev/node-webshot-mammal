@@ -3,6 +3,7 @@ var webshot = require('../lib/webshot')
   , fs = require('fs')
   , im = require('imagemagick')
   , testPNG= __dirname + '/test.png'
+  , testJSON= __dirname + '/test.json'
   , testPDF = __dirname + '/test.pdf';
 
 // Some test documents
@@ -119,6 +120,48 @@ describe('Creating screenshot images', function() {
   });
 });
 
+describe('Creating webpage details json', function() {
+
+  it('creates a json file', function(done) {
+    this.timeout(20000);
+
+    webshot('google.com', testPNG, { renderDelay: 2000, capturePageDetails: true, defaultWhiteBackground: true }, function(err) {
+      if (err) return done(err);
+
+      fs.exists(testJSON, function(exists) {
+        exists.should.equal(true);
+        done();
+      });
+    });
+  });
+
+  it('creates a json file that contains title info', function(done) {
+    this.timeout(20000);
+
+    webshot('google.com', testPNG, { renderDelay: 2000, capturePageDetails: true, defaultWhiteBackground: true }, function(err) {
+      if (err) return done(err);
+      var detailJSON = JSON.parse(fs.readFileSync(testJSON));
+      detailJSON.title.should.equal("Google");
+      done();
+    });
+  });
+
+  it('creates a json file that contains description meta tag info', function(done) {
+    this.timeout(20000);
+
+    webshot('www.w3.org', testPNG, { renderDelay: 2000, capturePageDetails: true, defaultWhiteBackground: true }, function(err) {
+      if (err) return done(err);
+      var detailJSON = JSON.parse(fs.readFileSync(testJSON));
+      var description = detailJSON.metaTags.filter(function(item) {
+        return item.metaName == "description";
+      })[0];
+
+      description.metaContent.should.equal("The World Wide Web Consortium (W3C) is an international community where Member organizations, a full-time staff, and the public work together to develop Web standards.");
+      done();
+    });
+  });
+
+});
 
 describe('Handling screenshot dimension options', function() {
 
