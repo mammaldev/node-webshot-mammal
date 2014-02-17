@@ -1,6 +1,8 @@
-# node-webshot
+# node-webshot-mammal
 
-Webshot provides a simple API for taking webpage screenshots. The module is a
+Webshot-mammal is a fork of Webshot - it adds a switch for generating a json file with page details such as title and description. 
+
+Webshot provides a simple API for taking webpage screenshots and generating a JSON file with associated data. The module is a
 light wrapper around PhantomJS, which utilizes WebKit to perform the page
 rendering.
 
@@ -175,6 +177,32 @@ the callback in a call to webshot.
       <td>false</td>
       <td>Wait for the web page to signal to webshot when to take the photo
       using <code>window.callPhantom('takeShot');</code></td>
+    </tr>
+    <tr>
+      <th>capturePageDetails</th>
+      <td>false</td>
+      <td>Boolean value, if set to true if will generate a companion JSON file with the same filename/path that contains the title and a hash of all meta tags on the page, example output below:<br> 
+      <code><pre>{
+  "metaTags": [
+    {
+      "metaContent": "text/html; charset=utf-8",
+      "metaName": "",
+      "metaProperty": ""
+    },
+    {
+      "metaContent": "width=device-width",
+      "metaName": "viewport",
+      "metaProperty": ""
+    },
+    {
+      "metaContent": "This website is awesome",
+      "metaName": "description",
+      "metaProperty": ""
+    }
+  ],
+  "title": "Awesome Webpage"
+  }</pre></code>
+      </td>
     </tr>
   </tbody>
 </table>
