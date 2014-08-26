@@ -118,6 +118,28 @@ describe('Creating screenshot images', function() {
       });
     });
   });
+
+
+  it('streams a screenshot even if there are JS errors on the page', function(done) {
+
+    webshot('<html><body><script>var a.b = "test";</script></body></html>', null, {siteType:'html'},function(err, renderStream) {
+      if (err) return done(err);
+
+      var file = fs.createWriteStream(testPNG, {encoding: 'binary'});
+
+      renderStream.on('data', function(data) {
+        file.write(data.toString('binary'), 'binary');
+      });
+
+      renderStream.on('end', function() {
+        im.identify(testPNG, function(err, features) {
+          features.width.should.be.above(0);
+          features.height.should.be.above(0);
+          done();
+        });
+      });
+    });
+  });
 });
 
 describe('Creating webpage details json', function() {
@@ -404,7 +426,7 @@ describe('Handling miscellaneous options', function() {
 
     this.timeout(20000);
 
-    webshot('google.com', testPNG, function(err) {
+    webshot('google.com', testPNG, options, function(err) {
       if (err) return done(err);
 
       fs.exists(testPNG, function(exists) {
@@ -421,11 +443,40 @@ describe('Handling miscellaneous options', function() {
 
     this.timeout(20000);
 
-    webshot('google.com', testPNG, function(err) {
+    webshot('google.com', testPNG, options, function(err) {
       if (err) return done(err);
 
       fs.exists(testPNG, function(exists) {
         exists.should.equal(true);
+        done();
+      });
+    });
+  });
+
+  it('screenshots a non-200 page status if errorIfStatusIsNot200 not set', function(done) {
+    var options = {
+    };
+
+    this.timeout(20000);
+
+    webshot('google.com/404-page-for-webshot-tests', testPNG, options, function(err) {
+      fs.exists(testPNG, function(exists) {
+        exists.should.equal(true);
+        done();
+      });
+    });
+  });
+
+  it('errors on non-200 page status if errorIfStatusIsNot200 set', function(done) {
+    var options = {
+      errorIfStatusIsNot200: true
+    };
+
+    this.timeout(20000);
+
+    webshot('google.com/404-page-for-webshot-tests', testPNG, options, function(err) {
+      fs.exists(testPNG, function(exists) {
+        exists.should.equal(false);
         done();
       });
     });
